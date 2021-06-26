@@ -1,0 +1,5 @@
+
+exports.users = (req,res) =>{
+
+    
+}
