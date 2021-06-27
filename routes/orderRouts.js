@@ -7,7 +7,7 @@ router.delete("/:id",orderController.removeOrder);
 router.get('/',orderController.getOrder);
 router.get('/:id',orderController.getByIdOrder);
 router.get('/users/:userId',orderController.getUserOrder);
-router.get('/orderCount',orderController.ordersCount);
-router.get('/totalSales',orderController.getTotalSales);
+router.get('/get/ordersCount',orderController.ordersCount);
+router.get('/get/totalSales',orderController.getTotalSales);
 
 module.exports = router;

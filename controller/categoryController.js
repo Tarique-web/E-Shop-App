@@ -3,41 +3,42 @@ const CategoryModel = require('../model/categoryModel');
 const mongoose = require('mongoose');
 
 
-exports.getCategory = (req,res) =>{
+exports.getCategory = (req, res) => {
 
-    CategoryModel.find().then((category)=>{
+    CategoryModel.find().then((category) => {
         res.status(200).send({
-            status:200,
-            data:category
+            status: 200,
+            data: category
         })
-    }).catch((err)=>{
+    }).catch((err) => {
         res.status(500).send({
-            status:500,
-            error:err
+            status: 500,
+            error: err
         })
     })
-  
+
 }
 
-exports.getCategoryById = (req,res) =>{
+exports.getCategoryById = (req, res) => {
 
-    CategoryModel.findById(req.params.id).then((category)=>{
-        if(!category) {
-            return res.status(500).json({
-                status:500,
-                message: 'The category with the given ID was not found.'})
-        } 
+    CategoryModel.findById(req.params.id).then((category) => {
+        if (!category) {
+            return res.status(500).send({
+                status: 500,
+                message: 'The category with the given ID was not found.'
+            })
+        }
         res.status(200).send({
-            status:200,
-            data:category
+            status: 200,
+            data: category
         })
-    }).catch((err)=>{
+    }).catch((err) => {
         res.status(500).send({
-            status:500,
-            error:err
+            status: 500,
+            error: err
         })
     })
-  
+
 }
 
 exports.createCategory = (req, res) => {
@@ -47,11 +48,12 @@ exports.createCategory = (req, res) => {
         icon: req.body.icon,
         color: req.body.color
     })
-    category.save().then((results) => {
-        if (results)
+    category.save().then((category) => {
+        if (category)
             return res.status(200).send({
                 status: 200,
-                message: "The category is created !"
+                message: "The category is created !",
+                category: category
 
             })
         res.status(400).send({
@@ -63,7 +65,7 @@ exports.createCategory = (req, res) => {
     }).catch((err) => {
         res.status(500).send({
             status: 500,
-            message: err || 'The category cannot be created'
+            error: err
         })
     });
 
@@ -87,14 +89,12 @@ exports.updateCategory = async (req, res) => {
 
         res.status(200).send({
             status: 200,
-            success: true,
             message: "The category is updated!."
         })
     }).catch((err) => {
         res.status(500).send({
             status: 500,
-            success: false,
-            message: err || 'The category cannot be updated!.'
+            error: err
         })
     })
 
@@ -104,9 +104,9 @@ exports.updateCategory = async (req, res) => {
 exports.deleteCategory = (req, res) => {
     CategoryModel.findByIdAndRemove(req.params.id).then(category => {
         if (category) {
-            return res.status(200).json({ status: 200, message: 'The category is deleted!' })
+            return res.status(200).send({ status: 200, message: 'The category is deleted!' })
         } else {
-            return res.status(404).json({ status: 404, message: "category not found!" })
+            return res.status(404).send({ status: 404, message: "category not found!" })
         }
     }).catch(err => {
         res.status(500).send({

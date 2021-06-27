@@ -2,10 +2,37 @@ const ProductModel = require('../model/productsModel');
 const CategoryModel = require('../model/categoryModel');
 const mongoose = require('mongoose');
 
+const multer = require('multer');
+
+// const FILE_TYPE_MAP = {
+//     'image/png': 'png',
+//     'image/jpeg': 'jpeg',
+//     'image/jpg': 'jpg'
+// }
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         const isValid = FILE_TYPE_MAP[file.mimetype];
+//         let uploadError = new Error('invalid image type');
+
+//         if (isValid) {
+//             uploadError = null
+//         }
+//         cb(uploadError, 'public/uploads')
+//     },
+//     filename: function (req, file, cb) {
+
+//         const fileName = file.originalname.split(' ').join('-');
+//         const extension = FILE_TYPE_MAP[file.mimetype];
+//         cb(null, `${fileName}-${Date.now()}.${extension}`)
+//     }
+// })
+// const uploadOptions = multer({ storage: storage })
+
 
 //Getting a products as filtering
 exports.filterProduct = async (req, res) => {
-    // localhost:8000/products?categories=2342342,234234
+
+    // localhost:8000/product?categories=2342342,234234
 
     let filter = {};
     if (req.query.categories) {
@@ -27,7 +54,7 @@ exports.filterProduct = async (req, res) => {
     })
 }
 
-exports.getProduct = async(req, res) => {
+exports.getProduct = async (req, res) => {
 
     const product = await Product.findById(req.params.id).populate('category');
 
@@ -44,29 +71,40 @@ exports.getProduct = async(req, res) => {
     });
 }
 
-exports.getAllProduct = async(req,res)=>{
-    ProductModel.find().populate('category').then((product)=>{
+exports.getAllProduct = async (req, res) => {
+    ProductModel.find().populate('category').then((product) => {
         res.status(200).send({
-            status:200,
-            data:product
+            status: 200,
+            data: product
         })
-    }).catch((err)=>{
+    }).catch((err) => {
         res.status(500).send({
-            status:500,
-            error:err
+            status: 500,
+            error: err
         })
     })
 }
 exports.createProduct = async (req, res) => {
 
     const category = await CategoryModel.findById(req.body.category);
-    if (!category) return res.status(400).send('Invalid Category')
+    if (!category) return res.status(400).send({
+        status: 400,
+        message: 'Invalid Category'
+    })
+
+
+    // const file = req.file;
+    // if (!file) return res.status(400).json('No image in the request')
+
+    // const fileName = file.filename
+    // const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
     let product = new ProductModel({
         name: req.body.name,
         description: req.body.description,
         richDescription: req.body.richDescription,
-        image: req.body.image,
+        // image: `${basePath}${fileName}`,
+        image: req.file,
         brand: req.body.brand,
         price: req.body.price,
         category: req.body.category,
@@ -76,17 +114,11 @@ exports.createProduct = async (req, res) => {
         isFeatured: req.body.isFeatured,
     })
 
-    // product = await product.save();
-
-    // if(!product) 
-    // return res.status(500).send('The product cannot be created')
-
-    // res.send(product);
     product.save().then((results) => {
         res.status(200).send({
             status: 200,
             message: "The pruduct is created !",
-            data:results
+            data: results
 
         })
     }).catch((err) => {
@@ -129,17 +161,22 @@ exports.updateProduct = async (req, res) => {
             isFeatured: req.body.isFeatured,
         },
         { new: true }
-    ).then((results) => {
-        res.status(200).send({
-            status: 200,
-            success: true,
-            message: "The product is updated!."
-        })
+    ).then((product) => {
+        if (product) {
+            res.status(200).send({
+                status: 200,
+                success: true,
+                message: "The product is updated!."
+            })
+        } else {
+            return res.status(404).send({ status: 404, success: false, message: "Product not found!" })
+        }
+
     }).catch((err) => {
+
         res.status(500).send({
             status: 500,
-            success: false,
-            message: 'The product cannot be updated!.' || err
+            error: err
         })
     })
 
@@ -167,7 +204,7 @@ exports.countProduct = async (req, res) => {
     const productCount = await ProductModel.countDocuments((count) => count)
 
     if (!productCount) {
-        res.status(500).json({
+        res.status(500).send({
             status: 500,
             success: false,
             message: "Product connot be counted !"
@@ -185,7 +222,7 @@ exports.featuredProduct = async (req, res) => {
     const products = await ProductModel.find({ isFeatured: true }).limit(+count);
 
     if (!products) {
-        res.status(500).json({ success: false })
+        res.status(500).send({ success: false })
     }
     res.status(200).send({
         status: 200,

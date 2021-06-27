@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 exports.createUsers = async (req, res) => {
 
-    //hashing password
+   
     const passwordHash = await bcrypt.hashSync(req.body.passwordHash, 10);   
 
     let user = new UserModel({
@@ -84,19 +84,19 @@ exports.deleteUser = async(req, res) => {
 
     UserModel.findByIdAndRemove(req.params.id).then(user => {
         if (user) {
-            return res.status(200).json({ status: 200, message: 'the user is deleted!' })
+            return res.status(200).send({ status: 200, message: 'the user is deleted!' })
         } else {
-            return res.status(404).json({ status: 404, message: "user not found!" })
+            return res.status(404).send({ status: 404, message: "user not found!" })
         }
     }).catch(err => {
-        return res.status(500).json({ status: 500, error: err })
+        return res.status(500).send({ status: 500, error: err })
     })
 }
 
 exports.getUser = async (req, res) => {
     UserModel.find().select('-passwordHash').then((userList)=>{
         if (!userList) {
-            return res.status(500).json({
+            return res.status(500).send({
                 status: 500,
                 user: empty
             })
@@ -118,10 +118,9 @@ exports.getUser = async (req, res) => {
 
 exports.countUser = (req, res) => {
 
-    
     UserModel.countDocuments().then((userCount)=>{
         if (!userCount) {
-            return res.status(500).json({
+            return res.status(500).send({
                 status: 500,
                 userCount: empty
             }
@@ -146,7 +145,7 @@ exports.getUserById = async (req, res) => {
     const user = await UserModel.findById(req.params.id).select('-passwordHash');
 
     if (!user) {
-        return res.status(500).json({
+        return res.status(500).send({
             status: 500,
             message: 'The user with the given ID was not found.'
         })

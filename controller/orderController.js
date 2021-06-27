@@ -36,7 +36,7 @@ exports.createOrder = async (req, res) => {
         user: req.body.user,
     })
 
-    OrderModel.save().then((order) => {
+    order.save().then((order) => {
         if (!order)
             return res.status(400).send('the order cannot be created!')
         res.status(200).send({
@@ -166,7 +166,6 @@ exports.ordersCount = async(req,res)=>{
 }
 
 exports.getTotalSales = async (req,res)=>{
-
     const totalSales= await OrderModel.aggregate([
         { $group: { _id: null , totalsales : { $sum : '$totalPrice'}}}
     ])
