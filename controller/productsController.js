@@ -44,6 +44,19 @@ exports.getProduct = async(req, res) => {
     });
 }
 
+exports.getAllProduct = async(req,res)=>{
+    ProductModel.find().populate('category').then((product)=>{
+        res.status(200).send({
+            status:200,
+            data:product
+        })
+    }).catch((err)=>{
+        res.status(500).send({
+            status:500,
+            error:err
+        })
+    })
+}
 exports.createProduct = async (req, res) => {
 
     const category = await CategoryModel.findById(req.body.category);
@@ -72,7 +85,8 @@ exports.createProduct = async (req, res) => {
     product.save().then((results) => {
         res.status(200).send({
             status: 200,
-            message: "The pruduct is created !"
+            message: "The pruduct is created !",
+            data:results
 
         })
     }).catch((err) => {
@@ -129,10 +143,7 @@ exports.updateProduct = async (req, res) => {
         })
     })
 
-    // if (!product)
-    //     return res.status(500).send('the product cannot be updated!')
 
-    // res.send(product);
 }
 
 exports.deleteProduct = (req, res) => {
